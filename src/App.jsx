@@ -271,12 +271,12 @@ const fetchInitialData = async () => {
 
   // Estatísticas para o Dashboard
   const stats = useMemo(() => {
-    const hoje = new Date().toISOString().split('T')[0];
+    const hoje = new Date().toLocaleDateString('en-CA');
     const appsHoje = appointments.filter(a => a.date === hoje);
     return {
       total: appsHoje.length,
-      confirmados: appsHoje.filter(a => a.status === 'Confirmado').length,
-      pendentes: appsHoje.filter(a => a.status === 'Pendente').length
+      confirmados: appsHoje.filter(a => a.status?.toLowerCase() === 'confirmado').length,
+      pendentes: appsHoje.filter(a => a.status?.toLowerCase() === 'pendente').length
     };
   }, [appointments]);
 
