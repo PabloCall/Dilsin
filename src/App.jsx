@@ -140,7 +140,12 @@ const fetchInitialData = async () => {
     if (set) {
       const hours = set.find(s => s.key === 'working_hours')?.value;
       if (hours) setWorkingHours(hours);
-    }
+
+      const closedDate = set.find(s => s.key === 'manual_close_date')?.value;
+      const today = new Date().toISOString().split('T')[0];
+      
+      setIsManuallyClosedToday(closedDate === today);
+    } 
 
     // Busca Agendamentos
     const { data: appt, error: errAppt } = await supabase
@@ -392,6 +397,27 @@ const saveWorkingHours = async (updatedHours) => {
   if (error) {
     console.error("Erro ao salvar horários:", error);
     alert("Não foi possível salvar os novos horários no banco.");
+  }
+};
+
+const toggleManualClose = async () => {
+  const newState = !isManuallyClosedToday;
+  const today = new Date().toISOString().split('T')[0];
+  
+  // Se estamos fechando, mandamos a data de hoje. Se estamos abrindo, mandamos uma data antiga.
+  const dateToSave = newState ? today : '2000-01-01';
+
+  // 1. Atualiza o banco
+  const { error } = await supabase
+    .from('settings')
+    .update({ value: JSON.stringify(dateToSave) }) // Garante que vai como string JSON
+    .eq('key', 'manual_close_date');
+
+  if (!error) {
+    // 2. Só atualiza a tela se o banco confirmou
+    setIsManuallyClosedToday(newState);
+  } else {
+    alert("Erro ao salvar status da barbearia.");
   }
 };
 
@@ -796,7 +822,7 @@ const saveWorkingHours = async (updatedHours) => {
                       <p className="text-sm text-slate-500 mt-1">Este botão desativa agendamentos para o dia de HOJE. Dias futuros continuam abertos.</p>
                     </div>
                     <button 
-                      onClick={() => setIsManuallyClosedToday(!isManuallyClosedToday)}
+                      onClick={toggleManualClose}
                       className={`relative inline-flex h-12 w-28 items-center rounded-full transition-colors focus:outline-none shadow-inner ${isManuallyClosedToday ? 'bg-red-500' : 'bg-green-500'}`}
                     >
                       <span className={`inline-block h-8 w-8 transform rounded-full bg-white transition-transform shadow-md ${isManuallyClosedToday ? 'translate-x-16' : 'translate-x-2'}`} />
