@@ -420,7 +420,7 @@ const toggleManualClose = async () => {
   // Filtrar apenas agendamentos do usuário atual
   const myAppointments = useMemo(() => {
     if (!sessionUserPhone) return [];
-    return appointments.filter(app => app.clientPhone === sessionUserPhone);
+    return appointments.filter(app => app.client_phone === sessionUserPhone);
   }, [appointments, sessionUserPhone]);
 
   const NavItem = ({ view, icon: Icon, label }) => (
@@ -779,10 +779,10 @@ const toggleManualClose = async () => {
                               <span className="text-xs text-slate-400">{a.date.split('-').reverse().join('/')}</span>
                             </td>
                             <td className="px-6 py-4">
-                              <p className="font-bold">{a.clientName}</p>
-                              <p className="text-xs text-slate-500 flex items-center gap-1"><Phone size={10}/> {a.clientPhone}</p>
+                              <p className="font-bold">{a.client_name}</p>
+                              <p className="text-xs text-slate-500 flex items-center gap-1"><Phone size={10}/> {a.client_phone}</p>
                             </td>
-                            <td className="px-6 py-4 text-sm text-slate-600">{a.service?.name}</td>
+                            <td className="px-6 py-4 text-sm text-slate-600">{a.service_name}</td>
                             <td className="px-6 py-4">
                               <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${a.status === 'Confirmado' ? 'bg-green-100 text-green-700' : a.status === 'Pendente' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'}`}>
                                 {a.status}
