@@ -68,6 +68,25 @@ const getDayOfWeek = (dateStr) => {
   return date.getDay();
 };
 
+const formatPhone = (value) => {
+  if (!value) return "";
+  let v = value.replace(/\D/g, ""); // Remove tudo que não é dígito
+  if (v.length > 11) v = v.slice(0, 11); // Limita a 11 dígitos
+  
+  if (v.length > 10) {
+    // Formato (XX) XXXXX-XXXX
+    return v.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
+  } else if (v.length > 5) {
+    // Formato (XX) XXXX-XXXX (caso seja fixo ou esteja digitando)
+    return v.replace(/(\d{2})(\d{4})(\d{0,4})/, "($1) $2-$3");
+  } else if (v.length > 2) {
+    return v.replace(/(\d{2})(\d{0,5})/, "($1) $2");
+  } else if (v.length > 0) {
+    return v.replace(/(\d*)/, "($1");
+  }
+  return v;
+};
+
 // --- Componentes de UI ---
 
 const Button = ({ children, onClick, variant = 'primary', className = '', disabled = false, type = "button" }) => {
@@ -699,10 +718,13 @@ const toggleManualClose = async () => {
                  <div className="flex gap-2 max-w-xs mx-auto">
                     <input 
                       type="tel" 
-                      placeholder="Seu telefone" 
-                      className="p-2 border rounded-lg w-full"
+                      placeholder="(XX) XXXXX-XXXX" 
+                      className="p-2 border rounded-lg w-full outline-none focus:ring-2 focus:ring-slate-900"
                       value={clientData.phone}
-                      onChange={(e) => setClientData({...clientData, phone: e.target.value})}
+                      onChange={(e) => {
+                        const maskedValue = formatPhone(e.target.value);
+                        setClientData({...clientData, phone: maskedValue});
+                      }}
                     />
                     <Button onClick={() => {
                       setSessionUserPhone(clientData.phone);
