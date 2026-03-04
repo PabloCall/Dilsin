@@ -403,18 +403,14 @@ const saveWorkingHours = async (updatedHours) => {
 const toggleManualClose = async () => {
   const newState = !isManuallyClosedToday;
   const today = new Date().toISOString().split('T')[0];
-  
-  // Se estamos fechando, mandamos a data de hoje. Se estamos abrindo, mandamos uma data antiga.
   const dateToSave = newState ? today : '2000-01-01';
 
-  // 1. Atualiza o banco
   const { error } = await supabase
     .from('settings')
-    .update({ value: JSON.stringify(dateToSave) }) // Garante que vai como string JSON
+    .update({ value: dateToSave }) // Removido o JSON.stringify daqui
     .eq('key', 'manual_close_date');
 
   if (!error) {
-    // 2. Só atualiza a tela se o banco confirmou
     setIsManuallyClosedToday(newState);
   } else {
     alert("Erro ao salvar status da barbearia.");
