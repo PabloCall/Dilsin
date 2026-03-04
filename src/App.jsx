@@ -1,3 +1,4 @@
+import { supabase } from './supabase'; // Adicione no topo
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Calendar, 
@@ -112,27 +113,45 @@ export default function App() {
   const [sessionUserPhone, setSessionUserPhone] = useState(localStorage.getItem('userPhone') || '');
 
   // Agendamentos
-  const [appointments, setAppointments] = useState([
-    { id: '1', date: new Date().toISOString().split('T')[0], time: '10:00', clientName: 'Carlos Souza', clientPhone: '61988887777', service: { name: 'Corte de Cabelo', duration: 45 }, status: 'Confirmado' },
-    { id: '2', date: new Date().toISOString().split('T')[0], time: '11:15', clientName: 'Felipe Amorim', clientPhone: '61977776666', service: { name: 'Barba Completa', duration: 30 }, status: 'Pendente' }
-  ]);
+  const [appointments, setAppointments] = useState([]);
   
-  const [workingHours, setWorkingHours] = useState([
-    { day: 0, open: "09:00", close: "13:00", closed: true },
-    { day: 1, open: "09:00", close: "19:00", closed: false },
-    { day: 2, open: "09:00", close: "19:00", closed: false },
-    { day: 3, open: "09:00", close: "19:00", closed: false },
-    { day: 4, open: "09:00", close: "19:00", closed: false },
-    { day: 5, open: "09:00", close: "19:00", closed: false },
-    { day: 6, open: "08:00", close: "18:00", closed: false },
-  ]);
+  const [workingHours, setWorkingHours] = useState([]);
 
-  const [services, setServices] = useState([
-    { id: 1, name: 'Corte de Cabelo', duration: 45, price: 45.00 },
-    { id: 2, name: 'Barba Completa', duration: 30, price: 30.00 },
-    { id: 3, name: 'Combo (Corte + Barba)', duration: 75, price: 70.00 },
-    { id: 4, name: 'Pezinho e Acabamento', duration: 15, price: 15.00 },
-  ]);
+  const [services, setServices] = useState([]);
+
+  useEffect(() => {
+  fetchInitialData();
+}, []);
+
+const fetchInitialData = async () => {
+  try {
+    // Busca Serviços
+    const { data: svc, error: errSvc } = await supabase
+      .from('services')
+      .select('*')
+      .order('name');
+    if (svc) setServices(svc);
+
+    // Busca Configurações (Horários)
+    const { data: set, error: errSet } = await supabase
+      .from('settings')
+      .select('*');
+    
+    if (set) {
+      const hours = set.find(s => s.key === 'working_hours')?.value;
+      if (hours) setWorkingHours(hours);
+    }
+
+    // Busca Agendamentos
+    const { data: appt, error: errAppt } = await supabase
+      .from('appointments')
+      .select('*');
+    if (appt) setAppointments(appt);
+
+  } catch (error) {
+    console.error("Erro ao carregar dados:", error);
+  }
+};
 
   const [bookingStep, setBookingStep] = useState(1);
   const [selectedService, setSelectedService] = useState(null);
@@ -219,60 +238,132 @@ export default function App() {
     };
   }, [appointments]);
 
-  const handleBooking = () => {
-    const newAppointment = {
-      id: Math.random().toString(36).substr(2, 9),
-      service: { ...selectedService },
-      barber: { ...BARBER_FIXO },
-      date: selectedDate,
-      time: selectedTime,
-      clientName: clientData.name,
-      clientPhone: clientData.phone,
-      status: 'Pendente',
-      createdAt: new Date().toLocaleDateString()
-    };
-    
-    // Salva o telefone para identificar o usuário
-    setSessionUserPhone(clientData.phone);
-    localStorage.setItem('userPhone', clientData.phone);
-    
-    setAppointments([...appointments, newAppointment]);
-    setBookingStep(5);
+const handleBooking = async () => {
+  // Objeto preparado para o Postgres (snake_case)
+  const novoAgendamento = {
+    client_name: clientData.name,
+    client_phone: clientData.phone,
+    date: selectedDate,
+    time: selectedTime,
+    service_name: selectedService.name,
+    service_duration: selectedService.duration,
+    service_price: selectedService.price,
+    status: 'Pendente'
   };
 
-  const handleAdminLogin = (e) => {
-    e.preventDefault();
-    if (adminPassword === '123') {
-      setIsAdminAuthenticated(true);
-      setCurrentView('admin');
-      setAdminTab('dashboard');
-    } else {
-      alert('Senha incorreta!');
-    }
-  };
+  const { data, error } = await supabase
+    .from('appointments')
+    .insert([novoAgendamento])
+    .select();
 
-  const updateStatus = (id, newStatus) => {
+  if (error) {
+    alert("Erro ao gravar no banco: " + error.message);
+    return;
+  }
+
+  // Se gravou com sucesso, atualizamos o estado local
+  setAppointments([...appointments, data[0]]);
+  setSessionUserPhone(clientData.phone);
+  setBookingStep(5);
+};
+
+const handleAdminLogin = async (e) => {
+  e.preventDefault();
+
+  // Busca no banco se existe a chave admin_password com o valor digitado
+  const { data, error } = await supabase
+    .from('system_auth')
+    .select('value')
+    .eq('key', 'admin_password')
+    .single(); // .single() porque esperamos apenas uma linha
+
+  if (error) {
+    console.error("Erro ao validar senha:", error);
+    alert('Erro ao conectar ao servidor.');
+    return;
+  }
+
+  if (data && data.value === adminPassword) {
+    setIsAdminAuthenticated(true);
+    setCurrentView('admin');
+    setAdminTab('dashboard');
+    setAdminPassword(''); // Limpa o campo por segurança
+  } else {
+    alert('Senha incorreta!');
+  }
+};
+
+const updateStatus = async (id, newStatus) => {
+  const { error } = await supabase
+    .from('appointments')
+    .update({ status: newStatus })
+    .eq('id', id);
+
+  if (error) {
+    alert("Erro ao atualizar status: " + error.message);
+  } else {
+    // Atualiza o front apenas se o banco confirmou
     setAppointments(appointments.map(a => a.id === id ? { ...a, status: newStatus } : a));
-  };
+  }
+};
 
-  const handleUpdateService = (e) => {
-    e.preventDefault();
-    if (!editingService) return;
+const handleUpdateService = async (e) => {
+  e.preventDefault();
+  if (!editingService) return;
+
+  const { error } = await supabase
+    .from('services')
+    .update({
+      name: editingService.name,
+      duration: parseInt(editingService.duration),
+      price: parseFloat(editingService.price)
+    })
+    .eq('id', editingService.id);
+
+  if (error) {
+    alert("Erro ao salvar no banco: " + error.message);
+  } else {
     setServices(services.map(s => s.id === editingService.id ? editingService : s));
     setEditingService(null);
-  };
+  }
+};
 
-  const deleteService = (id) => {
-    if(confirm('Tem certeza que deseja apagar este serviço?')) {
+const deleteService = async (id) => {
+  if(confirm('Tem certeza que deseja apagar este serviço?')) {
+    const { error } = await supabase
+      .from('services')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      alert("Erro ao deletar: " + error.message);
+    } else {
       setServices(services.filter(s => s.id !== id));
     }
+  }
+};
+
+const addService = async () => {
+  const newS = { 
+    name: 'Novo Serviço', 
+    duration: 30, 
+    price: 0 
   };
 
-  const addService = () => {
-    const newS = { id: Date.now(), name: 'Novo Serviço', duration: 30, price: 0 };
-    setServices([...services, newS]);
-    setEditingService(newS);
-  };
+  const { data, error } = await supabase
+    .from('services')
+    .insert([newS])
+    .select();
+
+  if (error) {
+    alert("Erro ao criar serviço: " + error.message);
+  } else {
+    // data[0] contém o serviço com o ID gerado pelo Postgres
+    setServices([...services, data[0]]);
+    setEditingService(data[0]);
+    setIsAddingService(true); // Se você usa essa flag para abrir o modal/form
+  }
+};
 
   // Filtrar apenas agendamentos do usuário atual
   const myAppointments = useMemo(() => {
