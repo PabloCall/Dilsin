@@ -6,8 +6,8 @@ export default {
   ],
   // Adicione isso aqui para "forçar" as cores no CSS final
   safelist: [
-    'border-blue-500',
-    'border-green-500',
+    'border-sky-500',
+    'border-emerald-500',
     'border-yellow-500',
   ],
   theme: {
