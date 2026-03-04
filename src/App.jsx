@@ -592,7 +592,24 @@ const toggleManualClose = async () => {
                   <div className="max-w-md mx-auto space-y-4">
                     <h3 className="text-xl font-semibold text-center">Seus Dados</h3>
                     <input type="text" placeholder="Seu Nome" className="w-full p-3 border rounded-lg" value={clientData.name} onChange={(e) => setClientData({...clientData, name: e.target.value})} />
-                    <input type="tel" placeholder="Telefone (WhatsApp)" className="w-full p-3 border rounded-lg" value={clientData.phone} onChange={(e) => setClientData({...clientData, phone: e.target.value})} />
+                    <input 
+                      type="tel" 
+                      placeholder="(XX) XXXXX-XXXX" 
+                      className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-slate-900" 
+                      value={clientData.phone} 
+                      onChange={(e) => {
+                        let value = e.target.value.replace(/\D/g, ""); // Remove tudo que não é número
+                        
+                        // Aplica a máscara dinamicamente
+                        if (value.length <= 11) {
+                          value = value.replace(/^(\d{2})(\d)/g, "($1) $2");
+                          value = value.replace(/(\d{5})(\d)/, "$1-$2");
+                        }
+                        
+                        // Limita a 15 caracteres: (XX) XXXXX-XXXX
+                        setClientData({...clientData, phone: value.substring(0, 15)});
+                      }} 
+                    />
                     <div className="flex justify-between pt-6">
                       <Button variant="outline" onClick={() => setBookingStep(2)}>Voltar</Button>
                       <Button disabled={!clientData.name || !clientData.phone} onClick={() => setBookingStep(4)}>Revisar</Button>
@@ -705,7 +722,7 @@ const toggleManualClose = async () => {
                 {myAppointments.map(app => (
                   <Card key={app.id} className="p-6 flex justify-between items-center">
                     <div>
-                      <h4 className="font-bold text-lg">{app.service?.name}</h4>
+                      <h4 className="font-bold text-lg">{app.service_name}</h4>
                       <p className="text-sm text-slate-500">{app.date.split('-').reverse().join('/')} às {app.time}</p>
                       <div className="mt-2">
                         <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${app.status === 'Confirmado' ? 'bg-green-100 text-green-700' : app.status === 'Pendente' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'}`}>
