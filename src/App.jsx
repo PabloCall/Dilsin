@@ -171,9 +171,27 @@ const fetchInitialData = async () => {
     setCurrentView('home');
   };
 
-  const handleUpdateWorkingHours = (day, field, value) => {
-    setWorkingHours(prev => prev.map(h => h.day === day ? { ...h, [field]: value } : h));
-  };
+  const handleUpdateWorkingHours = async (day, field, value) => {
+  // 1. Criamos o novo array de horários com a alteração
+  const updatedHours = workingHours.map(h => 
+    h.day === day ? { ...h, [field]: value } : h
+  );
+
+  // 2. Atualizamos o estado local (para a tela mudar na hora)
+  setWorkingHours(updatedHours);
+
+  // 3. Persistimos no Supabase
+  // Como o campo no banco é JSONB, enviamos o array inteiro atualizado
+  const { error } = await supabase
+    .from('settings')
+    .update({ value: updatedHours })
+    .eq('key', 'working_hours');
+
+  if (error) {
+    console.error("Erro ao salvar no banco:", error);
+    alert("Erro ao sincronizar horários com o banco de dados.");
+  }
+};
 
   // --- Lógica de Horários ---
   const getAvailableSlots = (date, service) => {
@@ -362,6 +380,18 @@ const addService = async () => {
     setServices([...services, data[0]]);
     setEditingService(data[0]);
     setIsAddingService(true); // Se você usa essa flag para abrir o modal/form
+  }
+};
+
+const saveWorkingHours = async (updatedHours) => {
+  const { error } = await supabase
+    .from('settings')
+    .update({ value: updatedHours })
+    .eq('key', 'working_hours');
+
+  if (error) {
+    console.error("Erro ao salvar horários:", error);
+    alert("Não foi possível salvar os novos horários no banco.");
   }
 };
 
