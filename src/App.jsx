@@ -479,7 +479,7 @@ const toggleManualClose = async () => {
           <nav className="hidden md:flex items-center gap-2">
             <NavItem view="home" icon={Home} label="Início" />
             <NavItem view="my-appointments" icon={ClipboardList} label="Agendamentos" />
-            <NavItem view="admin" icon={LayoutDashboard} label="Painel ADM" />
+            <NavItem view="admin" icon={LayoutDashboard} label="Painel Admin" />
             <Button onClick={() => { setCurrentView('booking'); setBookingStep(1); }} className="ml-4">Agendar Agora</Button>
           </nav>
         </div>
