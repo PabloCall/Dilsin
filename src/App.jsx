@@ -272,6 +272,14 @@ const fetchInitialData = async () => {
   // Estatísticas para o Dashboard
   const stats = useMemo(() => {
     const hoje = new Date().toLocaleDateString('en-CA');
+
+    // LOG PARA DEBUG
+    console.log("Variável HOJE:", hoje);
+    if (appointments.length > 0) {
+      console.log("Data do primeiro registro no banco:", appointments[0].date);
+      console.log("Tipo da data no banco:", typeof appointments[0].date);
+    }
+
     const appsHoje = appointments.filter(a => a.date === hoje);
     return {
       total: appsHoje.length,
