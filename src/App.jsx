@@ -271,17 +271,20 @@ const fetchInitialData = async () => {
 
   // Estatísticas para o Dashboard
   const stats = useMemo(() => {
-    // Pega a data local de Brasília (ajuste manual de fuso se necessário)
-    const agora = new Date();
-    const hoje = agora.toLocaleDateString('en-CA'); // Retorna YYYY-MM-DD
+    // Padrão ISO YYYY-MM-DD
+    const hoje = new Date().toLocaleDateString('en-CA');
     
-    // Filtra os agendamentos
+    // Se não houver agendamentos ainda, retorna tudo zero imediatamente
+    if (!appointments || appointments.length === 0) {
+      return { total: 0, confirmados: 0, pendentes: 0 };
+    }
+  
     const appsHoje = appointments.filter(a => a.date === hoje);
-    
+  
     return {
-      total: appsHoje.length || 0,
-      confirmados: appsHoje.filter(a => a.status?.toLowerCase() === 'confirmado').length || 0,
-      pendentes: appsHoje.filter(a => a.status?.toLowerCase() === 'pendente').length || 0
+      total: appsHoje.length,
+      confirmados: appsHoje.filter(a => a.status?.toLowerCase() === 'confirmado').length,
+      pendentes: appsHoje.filter(a => a.status?.toLowerCase() === 'pendente').length
     };
   }, [appointments]);
 
