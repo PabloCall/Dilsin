@@ -4,8 +4,16 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
+  // Adicione isso aqui para "forçar" as cores no CSS final
+  safelist: [
+    'border-blue-500',
+    'border-green-500',
+    'border-yellow-500',
+  ],
   theme: {
-    extend: {},
+    extend: {
+      // ...
+    },
   },
   plugins: [],
 }
