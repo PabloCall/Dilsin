@@ -278,9 +278,9 @@ const fetchInitialData = async () => {
     if (!appointments || appointments.length === 0) {
       return { total: 0, confirmados: 0, pendentes: 0 };
     }
-  
+
     const appsHoje = appointments.filter(a => a.date === hoje);
-  
+
     return {
       total: appsHoje.length,
       confirmados: appsHoje.filter(a => a.status?.toLowerCase() === 'confirmado').length,
@@ -791,7 +791,10 @@ const toggleManualClose = async () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <Card className="p-6 bg-slate-900 text-white">
                     <p className="text-slate-400 text-sm">Agendamentos hoje</p>
-                    <h3 className="text-3xl font-bold">{stats.total}</h3>
+                    <h3 className="text-3xl font-bold">
+                      {/* O "Number(...)" garante que estamos tratando como número */}
+                      {Number(stats?.total || 0)}
+                    </h3>
                   </Card>
                   <Card className="p-6 border-l-4 border-green-500">
                     <p className="text-slate-500 text-sm">Confirmados</p>
