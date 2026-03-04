@@ -123,6 +123,7 @@ export default function App() {
   const [currentView, setCurrentView] = useState('home');
   const [adminTab, setAdminTab] = useState('dashboard');
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [adminPassword, setAdminPassword] = useState('');
   
   // Estado de funcionamento manual (Aberto/Fechado apenas para hoje)
@@ -470,19 +471,68 @@ const toggleManualClose = async () => {
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
       <header className="sticky top-0 z-50 bg-white border-b border-slate-200">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => setCurrentView('home')}>
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => { setCurrentView('home'); setIsMobileMenuOpen(false); }}>
             <div className="bg-slate-900 text-white p-2 rounded-lg">
               <Scissors size={20} />
             </div>
             <h1 className="text-xl font-bold tracking-tight">Barbearia Dilsin</h1>
           </div>
+        
+          {/* Nav Desktop */}
           <nav className="hidden md:flex items-center gap-2">
             <NavItem view="home" icon={Home} label="Início" />
             <NavItem view="my-appointments" icon={ClipboardList} label="Agendamentos" />
             <NavItem view="admin" icon={LayoutDashboard} label="Painel Admin" />
             <Button onClick={() => { setCurrentView('booking'); setBookingStep(1); }} className="ml-4">Agendar Agora</Button>
           </nav>
+        
+          {/* Botão Mobile */}
+          <button 
+            className="md:hidden p-2 text-slate-600"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
         </div>
+        
+        {/* MENU MOBILE: Adicione este bloco abaixo */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden bg-white border-t border-slate-100 py-4 px-4 flex flex-col gap-2 animate-in slide-in-from-top duration-200">
+            <button 
+              onClick={() => { setCurrentView('home'); setIsMobileMenuOpen(false); }}
+              className="flex items-center gap-3 p-3 text-slate-600 hover:bg-slate-50 rounded-lg text-left"
+            >
+              <Home size={20} /> <span className="font-medium">Início</span>
+            </button>
+            
+            <button 
+              onClick={() => { setCurrentView('my-appointments'); setIsMobileMenuOpen(false); }}
+              className="flex items-center gap-3 p-3 text-slate-600 hover:bg-slate-50 rounded-lg text-left"
+            >
+              <ClipboardList size={20} /> <span className="font-medium">Agendamentos</span>
+            </button>
+            
+            <button 
+              onClick={() => { 
+                if (!isAdminAuthenticated) setCurrentView('admin-login');
+                else setCurrentView('admin');
+                setIsMobileMenuOpen(false); 
+              }}
+              className="flex items-center gap-3 p-3 text-slate-600 hover:bg-slate-50 rounded-lg text-left"
+            >
+              <LayoutDashboard size={20} /> <span className="font-medium">Painel Admin</span>
+            </button>
+            
+            <div className="pt-2">
+              <Button 
+                onClick={() => { setCurrentView('booking'); setBookingStep(1); setIsMobileMenuOpen(false); }}
+                className="w-full justify-center"
+              >
+                Agendar Agora
+              </Button>
+            </div>
+          </div>
+        )}
       </header>
 
       <main className="max-w-6xl mx-auto px-4 py-8">
