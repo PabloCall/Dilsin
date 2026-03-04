@@ -129,7 +129,7 @@ const fetchInitialData = async () => {
     const { data: svc, error: errSvc } = await supabase
       .from('services')
       .select('*')
-      .order('name');
+      .order('sort_order', { ascending: true });
     if (svc) setServices(svc);
 
     // Busca Configurações (Horários)
