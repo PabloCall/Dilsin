@@ -789,15 +789,15 @@ const toggleManualClose = async () => {
             {adminTab === 'dashboard' && (
               <div className="space-y-8 animate-in fade-in duration-300">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <Card className="p-6 border-l-4 border-blue-500">
+                  <Card className="p-6 border-l-4 border-indigo-500">
                     <p className="text-slate-400 text-sm">Agendamentos hoje</p>
                     <h3 className="text-3xl font-bold">{stats.total}</h3>
                   </Card>
-                  <Card className="p-6 border-l-4 border-green-500">
+                  <Card className="p-6 border-l-4 border-emerald-500">
                     <p className="text-slate-500 text-sm">Confirmados</p>
                     <h3 className="text-3xl font-bold">{stats.confirmados}</h3>
                   </Card>
-                  <Card className="p-6 border-l-4 border-yellow-500">
+                  <Card className="p-6 border-l-4 border-amber-500">
                     <p className="text-slate-500 text-sm">Pendentes</p>
                     <h3 className="text-3xl font-bold">{stats.pendentes}</h3>
                   </Card>
