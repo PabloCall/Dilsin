@@ -271,20 +271,17 @@ const fetchInitialData = async () => {
 
   // Estatísticas para o Dashboard
   const stats = useMemo(() => {
-    const hoje = new Date().toLocaleDateString('en-CA');
-
-    // LOG PARA DEBUG
-    console.log("Variável HOJE:", hoje);
-    if (appointments.length > 0) {
-      console.log("Data do primeiro registro no banco:", appointments[0].date);
-      console.log("Tipo da data no banco:", typeof appointments[0].date);
-    }
-
+    // Pega a data local de Brasília (ajuste manual de fuso se necessário)
+    const agora = new Date();
+    const hoje = agora.toLocaleDateString('en-CA'); // Retorna YYYY-MM-DD
+    
+    // Filtra os agendamentos
     const appsHoje = appointments.filter(a => a.date === hoje);
+    
     return {
-      total: appsHoje.length,
-      confirmados: appsHoje.filter(a => a.status?.toLowerCase() === 'confirmado').length,
-      pendentes: appsHoje.filter(a => a.status?.toLowerCase() === 'pendente').length
+      total: appsHoje.length || 0,
+      confirmados: appsHoje.filter(a => a.status?.toLowerCase() === 'confirmado').length || 0,
+      pendentes: appsHoje.filter(a => a.status?.toLowerCase() === 'pendente').length || 0
     };
   }, [appointments]);
 
