@@ -190,8 +190,6 @@ useEffect(() => {
     // 2. Logout (Sair)
     if (event === "SIGNED_OUT") {
       setIsAdminAuthenticated(false);
-      // O navigateTo já vai fazer o setCurrentView('home') 
-      // e limpar a URL para /.
       navigateTo('home');
     } 
     
@@ -255,8 +253,8 @@ const fetchInitialData = async () => {
     setSelectedService(null);
     setSelectedDate('');
     setSelectedTime('');
-    setClientData({ name: '', phone: sessionUserPhone });
-    setCurrentView('home');
+    setClientData({ name: '', phone: sessionUserPhone }); 
+    navigateTo('home'); 
   };
 
   const handleUpdateWorkingHours = async (day, field, value) => {
@@ -396,7 +394,7 @@ const handleBooking = async () => {
   servico: selectedService.name,
   whatsapp: clientData.phone,
   wa_link: clientData.phone.replace(/\D/g, ''),
-  admin_email: "pablo.callado86@gmail.com"
+  admin_email: "adilsonoliveira4022@gmail.com"
   }, "ElVylC1k4E6bup5_L");
 };
 
