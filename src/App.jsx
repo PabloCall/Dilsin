@@ -374,14 +374,14 @@ const handleBooking = async () => {
   setSessionUserPhone(clientData.phone);
   setBookingStep(5);
 
-  emailjs.send("service_id", "template_novo_agendamento", {
+  emailjs.send("service_5h3f3zu", "template_b738cck", {
   cliente: clientData.name,
   data: selectedDate,
   horario: selectedTime,
   servico: selectedService.name,
   whatsapp: clientData.phone,
-  admin_email: "emaildoadilson@gmail.com"
-  }, "user_id");
+  admin_email: "pablo.callado86@gmail.com"
+  }, "ElVylC1k4E6bup5_L");
 };
 
 const handleLogin = async (email, password) => {
