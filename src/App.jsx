@@ -24,7 +24,9 @@ import {
   AlertCircle,
   Power,
   Settings,
-  Briefcase
+  Briefcase,
+  ArrowLeft,
+  Key
 } from 'lucide-react';
 
 // --- Configurações Fixas ---
