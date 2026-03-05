@@ -380,6 +380,7 @@ const handleBooking = async () => {
   horario: selectedTime,
   servico: selectedService.name,
   whatsapp: clientData.phone,
+  wa_link: clientData.phone.replace(/\D/g, ''),
   admin_email: "pablo.callado86@gmail.com"
   }, "ElVylC1k4E6bup5_L");
 };
