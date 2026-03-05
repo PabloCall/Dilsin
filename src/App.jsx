@@ -374,11 +374,9 @@ const handleBooking = async () => {
   setSessionUserPhone(clientData.phone);
   setBookingStep(5);
 
-  const dataFormatadaBR = selectedDate.split('-').reverse().join('/');
-
   emailjs.send("service_5h3f3zu", "template_b738cck", {
   cliente: clientData.name,
-  data: dataFormatadaBR,
+  data: selectedDate.split('-').reverse().join('/'),
   horario: selectedTime,
   servico: selectedService.name,
   whatsapp: clientData.phone,
