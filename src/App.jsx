@@ -180,20 +180,26 @@ useEffect(() => {
 
   // 2. O "Trigger" que monitora mudanças
   const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    // 1. Recuperação de Senha
     if (event === "PASSWORD_RECOVERY") {
-      setCurrentView('reset-password');
+      // O navigateTo já vai fazer o setCurrentView('reset-password')
+      // e colocar o /reset-password na URL.
       navigateTo('reset-password');
     }
 
-    // Se o evento for SIGNED_OUT, forçamos o estado para falso
+    // 2. Logout (Sair)
     if (event === "SIGNED_OUT") {
       setIsAdminAuthenticated(false);
-      setCurrentView('home');
+      // O navigateTo já vai fazer o setCurrentView('home') 
+      // e limpar a URL para /.
       navigateTo('home');
     } 
-    // Se logou ou renovou o token, garantimos que está true
+    
+    // 3. Login ou Refresh de Token
     else if (session) {
       setIsAdminAuthenticated(true);
+      // DICA DE AD: Se você quiser que ele vá direto para o admin ao logar:
+      // navigateTo('admin'); 
     }
   });
 
@@ -562,7 +568,13 @@ const toggleManualClose = async () => {
       <header className="sticky top-0 z-50 bg-white border-b border-slate-200">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
           {/* Logo */}
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => { setCurrentView('home'); setIsMobileMenuOpen(false); }}>
+          <div 
+            className="flex items-center gap-2 cursor-pointer" 
+            onClick={() => { 
+              navigateTo('home'); // <-- Aqui estava o "pulo do gato"
+              setIsMobileMenuOpen(false); 
+            }}
+          >
             <div className="bg-slate-900 text-white p-2 rounded-lg">
               <Scissors size={20} />
             </div>
