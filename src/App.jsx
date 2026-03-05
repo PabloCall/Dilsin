@@ -132,6 +132,11 @@ export default function App() {
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [adminPassword, setAdminPassword] = useState('');
+  const navigateTo = (view) => {
+    const url = view === 'home' ? '/' : `/${view}`;
+    window.history.pushState({ view }, '', url);
+    setCurrentView(view);
+  };
   
   // Estado de funcionamento manual (Aberto/Fechado apenas para hoje)
   const [isManuallyClosedToday, setIsManuallyClosedToday] = useState(false);
@@ -470,18 +475,23 @@ const toggleManualClose = async () => {
   }, [appointments, sessionUserPhone]);
 
   const NavItem = ({ view, icon: Icon, label }) => (
-    <button 
-      onClick={() => { 
+    <button
+      onClick={() => {
+        // Mantém a regra: se for admin e não estiver logado, manda pro login
         if (view === 'admin' && !isAdminAuthenticated) {
-          setCurrentView('admin-login');
+          navigateTo('admin-login');
         } else {
-          setCurrentView(view); 
+          navigateTo(view);
         }
       }}
-      className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${currentView === view ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100'}`}
+      className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+        currentView === view 
+          ? 'bg-slate-900 text-white' 
+          : 'text-slate-600 hover:bg-slate-100'
+      }`}
     >
-      <Icon size={20} />
-      <span className="font-medium">{label}</span>
+      <Icon size={18} />
+      <span className="font-medium text-sm">{label}</span>
     </button>
   );
 
@@ -517,14 +527,14 @@ const toggleManualClose = async () => {
         {isMobileMenuOpen && (
           <div className="md:hidden bg-white border-t border-slate-100 py-4 px-4 flex flex-col gap-2">
             <button 
-              onClick={() => { setCurrentView('home'); setIsMobileMenuOpen(false); }}
+              onClick={() => { navigateTo('home'); setIsMobileMenuOpen(false); }}
               className="flex items-center gap-3 p-3 text-slate-600 hover:bg-slate-50 rounded-lg text-left"
             >
               <Home size={20} /> <span className="font-medium">Início</span>
             </button>
 
             <button 
-              onClick={() => { setCurrentView('my-appointments'); setIsMobileMenuOpen(false); }}
+              onClick={() => { navigateTo('my-appointments'); setIsMobileMenuOpen(false); }}
               className="flex items-center gap-3 p-3 text-slate-600 hover:bg-slate-50 rounded-lg text-left"
             >
               <ClipboardList size={20} /> <span className="font-medium">Agendamentos</span>
