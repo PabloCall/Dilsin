@@ -471,6 +471,7 @@ const toggleManualClose = async () => {
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
       <header className="sticky top-0 z-50 bg-white border-b border-slate-200">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+          {/* Logo */}
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => { setCurrentView('home'); setIsMobileMenuOpen(false); }}>
             <div className="bg-slate-900 text-white p-2 rounded-lg">
               <Scissors size={20} />
@@ -478,12 +479,11 @@ const toggleManualClose = async () => {
             <h1 className="text-xl font-bold tracking-tight">Barbearia Dilsin</h1>
           </div>
         
-          {/* Nav Desktop */}
+          {/* Nav Desktop (Sem o botão repetido) */}
           <nav className="hidden md:flex items-center gap-2">
             <NavItem view="home" icon={Home} label="Início" />
             <NavItem view="my-appointments" icon={ClipboardList} label="Agendamentos" />
             <NavItem view="admin" icon={LayoutDashboard} label="Painel Admin" />
-            <Button onClick={() => { setCurrentView('booking'); setBookingStep(1); }} className="ml-4">Agendar Agora</Button>
           </nav>
         
           {/* Botão Mobile */}
@@ -495,9 +495,9 @@ const toggleManualClose = async () => {
           </button>
         </div>
         
-        {/* MENU MOBILE: Adicione este bloco abaixo */}
+        {/* Menu Mobile */}
         {isMobileMenuOpen && (
-          <div className="md:hidden bg-white border-t border-slate-100 py-4 px-4 flex flex-col gap-2 animate-in slide-in-from-top duration-200">
+          <div className="md:hidden bg-white border-t border-slate-100 py-4 px-4 flex flex-col gap-2">
             <button 
               onClick={() => { setCurrentView('home'); setIsMobileMenuOpen(false); }}
               className="flex items-center gap-3 p-3 text-slate-600 hover:bg-slate-50 rounded-lg text-left"
@@ -522,15 +522,6 @@ const toggleManualClose = async () => {
             >
               <LayoutDashboard size={20} /> <span className="font-medium">Painel Admin</span>
             </button>
-            
-            <div className="pt-2">
-              <Button 
-                onClick={() => { setCurrentView('booking'); setBookingStep(1); setIsMobileMenuOpen(false); }}
-                className="w-full justify-center"
-              >
-                Agendar Agora
-              </Button>
-            </div>
           </div>
         )}
       </header>
@@ -582,7 +573,7 @@ const toggleManualClose = async () => {
                 </div>
                 
                 <h2 className="text-4xl md:text-5xl font-extrabold mb-4 leading-tight">O visual impecável que você merece.</h2>
-                <p className="text-slate-200 text-lg mb-8">Tradição com Adilson Oliveira. Agende seu horário com quem entende de verdade.</p>
+                <p className="text-slate-200 text-lg mb-8">Agende seu horário com quem entende de verdade.</p>
                 
                 <Button onClick={() => setCurrentView('booking')} variant="accent" className="px-10 py-4 text-lg font-bold">AGENDAR AGORA</Button>
               </div>
