@@ -1,5 +1,6 @@
 import { supabase } from './supabase'; // Adicione no topo
 import React, { useState, useEffect, useMemo } from 'react';
+import emailjs from '@emailjs/browser'; // Importe o emailjs para envio de e-mails
 import { 
   Calendar, 
   Clock, 
@@ -372,6 +373,15 @@ const handleBooking = async () => {
   setAppointments([...appointments, data[0]]);
   setSessionUserPhone(clientData.phone);
   setBookingStep(5);
+
+  emailjs.send("service_id", "template_novo_agendamento", {
+  cliente: clientData.name,
+  data: selectedDate,
+  horario: selectedTime,
+  servico: selectedService.name,
+  whatsapp: clientData.phone,
+  admin_email: "emaildoadilson@gmail.com"
+  }, "user_id");
 };
 
 const handleLogin = async (email, password) => {
