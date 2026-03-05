@@ -87,6 +87,13 @@ const formatPhone = (value) => {
   return v;
 };
 
+const navigateTo = (view) => {
+  const url = view === 'home' ? '/' : `/${view}`;
+  // Altera a URL no navegador sem recarregar a página
+  window.history.pushState({ view }, '', url);
+  setCurrentView(view);
+};
+
 // --- Componentes de UI ---
 
 const Button = ({ children, onClick, variant = 'primary', className = '', disabled = false, type = "button" }) => {
@@ -141,6 +148,17 @@ export default function App() {
 
   useEffect(() => {
   fetchInitialData();
+}, []);
+
+useEffect(() => {
+  const handlePopState = (event) => {
+    // Se o usuário clicar em voltar, pegamos a view do histórico ou voltamos para home
+    const view = event.state?.view || 'home';
+    setCurrentView(view);
+  };
+
+  window.addEventListener('popstate', handlePopState);
+  return () => window.removeEventListener('popstate', handlePopState);
 }, []);
 
 const fetchInitialData = async () => {
@@ -478,14 +496,14 @@ const toggleManualClose = async () => {
             </div>
             <h1 className="text-xl font-bold tracking-tight">Barbearia Dilsin</h1>
           </div>
-        
+
           {/* Nav Desktop (Sem o botão repetido) */}
           <nav className="hidden md:flex items-center gap-2">
             <NavItem view="home" icon={Home} label="Início" />
             <NavItem view="my-appointments" icon={ClipboardList} label="Agendamentos" />
             <NavItem view="admin" icon={LayoutDashboard} label="Painel Admin" />
           </nav>
-        
+
           {/* Botão Mobile */}
           <button 
             className="md:hidden p-2 text-slate-600"
@@ -494,7 +512,7 @@ const toggleManualClose = async () => {
             {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
-        
+
         {/* Menu Mobile */}
         {isMobileMenuOpen && (
           <div className="md:hidden bg-white border-t border-slate-100 py-4 px-4 flex flex-col gap-2">
@@ -504,18 +522,18 @@ const toggleManualClose = async () => {
             >
               <Home size={20} /> <span className="font-medium">Início</span>
             </button>
-            
+
             <button 
               onClick={() => { setCurrentView('my-appointments'); setIsMobileMenuOpen(false); }}
               className="flex items-center gap-3 p-3 text-slate-600 hover:bg-slate-50 rounded-lg text-left"
             >
               <ClipboardList size={20} /> <span className="font-medium">Agendamentos</span>
             </button>
-            
+
             <button 
               onClick={() => { 
-                if (!isAdminAuthenticated) setCurrentView('admin-login');
-                else setCurrentView('admin');
+                const targetView = !isAdminAuthenticated ? 'admin-login' : 'admin';
+                navigateTo(targetView); // Aqui a URL muda para /admin ou /admin-login
                 setIsMobileMenuOpen(false); 
               }}
               className="flex items-center gap-3 p-3 text-slate-600 hover:bg-slate-50 rounded-lg text-left"
@@ -546,7 +564,7 @@ const toggleManualClose = async () => {
                   onChange={(e) => setAdminPassword(e.target.value)}
                 />
                 <Button type="submit" className="w-full">Entrar</Button>
-                <button onClick={() => setCurrentView('home')} className="w-full text-sm text-slate-400">Voltar</button>
+                <button onClick={() => navigateTo('home')} className="w-full text-sm text-slate-400">Voltar</button>
               </form>
             </Card>
           </div>
