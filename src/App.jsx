@@ -974,19 +974,45 @@ const toggleManualClose = async () => {
                   <h3 className="text-xl font-bold mb-4">Horários Regulares</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {workingHours.map(wh => (
-                      <div key={wh.day} className={`p-4 rounded-xl border flex items-center justify-between ${wh.closed ? 'bg-red-50/50 border-red-100' : 'bg-white border-slate-200'}`}>
-                        <div>
-                          <p className="font-bold text-sm">{DIAS_SEMANA[wh.day]}</p>
+                      <div key={wh.day} className={`p-4 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${wh.closed ? 'bg-red-50/50 border-red-100' : 'bg-white border-slate-200'}`}>
+                        {/* Bloco do Dia e Checkbox */}
+                        <div className="flex-shrink-0">
+                          <p className="font-bold text-sm uppercase text-slate-700">{DIAS_SEMANA[wh.day]}</p>
                           <label className="flex items-center gap-2 mt-1 cursor-pointer">
-                            <input type="checkbox" checked={!wh.closed} onChange={(e) => handleUpdateWorkingHours(wh.day, 'closed', !e.target.checked)} className="accent-slate-900" />
-                            <span className="text-xs">{wh.closed ? 'Não funcionamos' : 'Funcionamos'}</span>
+                            <input 
+                              type="checkbox" 
+                              checked={!wh.closed} 
+                              onChange={(e) => handleUpdateWorkingHours(wh.day, 'closed', !e.target.checked)} 
+                              className="accent-slate-900 h-4 w-4" 
+                            />
+                            <span className="text-xs font-medium">{wh.closed ? 'Não funcionamos' : 'Funcionamos'}</span>
                           </label>
                         </div>
+                                        
+                        {/* Bloco dos Horários - Aqui é onde resolvemos o vazamento */}
                         {!wh.closed && (
-                          <div className="flex gap-2">
-                            <input type="time" className="p-1 border rounded text-xs" value={wh.open} onChange={e => handleUpdateWorkingHours(wh.day, 'open', e.target.value)} />
-                            <span className="text-slate-400 text-xs">até</span>
-                            <input type="time" className="p-1 border rounded text-xs" value={wh.close} onChange={e => handleUpdateWorkingHours(wh.day, 'close', e.target.value)} />
+                          <div className="flex items-center gap-2 bg-slate-50 p-2 rounded-lg border border-slate-100 sm:bg-transparent sm:p-0 sm:border-none">
+                            <div className="flex items-center gap-1">
+                              <span className="text-[10px] uppercase text-slate-400 font-bold sm:hidden">De:</span>
+                              <input 
+                                type="time" 
+                                className="p-1.5 border rounded text-xs bg-white shadow-sm focus:ring-2 focus:ring-slate-200 outline-none" 
+                                value={wh.open} 
+                                onChange={e => handleUpdateWorkingHours(wh.day, 'open', e.target.value)} 
+                              />
+                            </div>
+                            
+                            <span className="text-slate-400 text-xs font-bold">até</span>
+                            
+                            <div className="flex items-center gap-1">
+                              <span className="text-[10px] uppercase text-slate-400 font-bold sm:hidden">Até:</span>
+                              <input 
+                                type="time" 
+                                className="p-1.5 border rounded text-xs bg-white shadow-sm focus:ring-2 focus:ring-slate-200 outline-none" 
+                                value={wh.close} 
+                                onChange={e => handleUpdateWorkingHours(wh.day, 'close', e.target.value)} 
+                              />
+                            </div>
                           </div>
                         )}
                       </div>
