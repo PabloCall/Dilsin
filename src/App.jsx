@@ -324,7 +324,7 @@ const fetchInitialData = async () => {
       if (!conflictingApp) {
         slots.push(minutesToTime(currentPointer));
         // Se está livre, avança 10 ou 15 min para oferecer o próximo horário
-        currentPointer += 20; 
+        currentPointer += 30; 
       } else {
         // SE HÁ CONFLITO: O cursor pula direto para o fim do agendamento que está atrapalhando
         // Isso garante que o próximo horário seja exatamente após os 70min + margem
