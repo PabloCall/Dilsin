@@ -172,13 +172,20 @@ useEffect(() => {
 }, []);
 
 useEffect(() => {
-  // Verifica se já existe uma sessão ativa ao carregar o site
+  // 1. Verifica a sessão atual ao carregar a página (F5)
   supabase.auth.getSession().then(({ data: { session } }) => {
     setIsAdminAuthenticated(!!session);
   });
 
-  // Escuta mudanças na autenticação (login/logout)
-  const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+  // 2. O "Trigger" que monitora mudanças (Login, Logout, Recuperação de Senha)
+  const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    // Se o evento for de recuperação de senha, joga o usuário para a view de reset
+    if (event === "PASSWORD_RECOVERY") {
+      setCurrentView('reset-password');
+      navigateTo('reset-password'); // Para atualizar a URL também
+    }
+    
+    // Atualiza se o admin está autenticado ou não
     setIsAdminAuthenticated(!!session);
   });
 
@@ -1123,6 +1130,47 @@ const toggleManualClose = async () => {
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {/* --- VIEW: RESETPASS --- */}
+        {currentView === 'reset-password' && (
+          <div className="max-w-md mx-auto py-20 px-4">
+            <Card className="p-8 shadow-xl border-t-4 border-t-indigo-600">
+              <div className="text-center mb-8">
+                <div className="bg-indigo-600 text-white p-3 rounded-2xl w-fit mx-auto mb-4">
+                  <Key size={24} />
+                </div>
+                <h2 className="text-2xl font-bold">Nova Senha</h2>
+                <p className="text-slate-500 text-sm mt-2">Digite sua nova senha de acesso</p>
+              </div>
+                
+              <form onSubmit={async (e) => {
+                e.preventDefault();
+                const newPassword = e.target.newPassword.value;
+                const { error } = await supabase.auth.updateUser({ password: newPassword });
+                
+                if (error) {
+                  alert("Erro ao atualizar: " + error.message);
+                } else {
+                  alert("Senha atualizada com sucesso!");
+                  navigateTo('admin-login');
+                }
+              }} className="space-y-4">
+                <div>
+                  <label className="text-xs font-bold uppercase text-slate-400 ml-1">Nova Senha</label>
+                  <input 
+                    name="newPassword"
+                    type="password" 
+                    className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-indigo-200 outline-none"
+                    placeholder="No mínimo 6 caracteres"
+                    required
+                    minLength={6}
+                  />
+                </div>
+                <Button type="submit" className="w-full py-4">Salvar Nova Senha</Button>
+              </form>
+            </Card>
           </div>
         )}
 
