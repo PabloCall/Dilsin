@@ -151,6 +151,9 @@ export default function App() {
 
   const [services, setServices] = useState([]);
 
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
   useEffect(() => {
   fetchInitialData();
 }, []);
@@ -164,6 +167,20 @@ useEffect(() => {
 
   window.addEventListener('popstate', handlePopState);
   return () => window.removeEventListener('popstate', handlePopState);
+}, []);
+
+useEffect(() => {
+  // Verifica se já existe uma sessão ativa ao carregar o site
+  supabase.auth.getSession().then(({ data: { session } }) => {
+    setIsAdminAuthenticated(!!session);
+  });
+
+  // Escuta mudanças na autenticação (login/logout)
+  const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    setIsAdminAuthenticated(!!session);
+  });
+
+  return () => subscription.unsubscribe();
 }, []);
 
 const fetchInitialData = async () => {
@@ -341,30 +358,28 @@ const handleBooking = async () => {
   setBookingStep(5);
 };
 
-const handleAdminLogin = async (e) => {
-  e.preventDefault();
-
-  // Busca no banco se existe a chave admin_password com o valor digitado
-  const { data, error } = await supabase
-    .from('system_auth')
-    .select('value')
-    .eq('key', 'admin_password')
-    .single(); // .single() porque esperamos apenas uma linha
+const handleLogin = async (email, password) => {
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: email,
+    password: password,
+  });
 
   if (error) {
-    console.error("Erro ao validar senha:", error);
-    alert('Erro ao conectar ao servidor.');
-    return;
-  }
-
-  if (data && data.value === adminPassword) {
-    setIsAdminAuthenticated(true);
-    setCurrentView('admin');
-    setAdminTab('dashboard');
-    setAdminPassword(''); // Limpa o campo por segurança
+    alert("Erro ao logar: " + error.message);
   } else {
-    alert('Senha incorreta!');
+    // O Supabase já guarda a sessão no LocalStorage automaticamente
+    setIsAdminAuthenticated(true);
+    navigateTo('admin');
   }
+};
+
+const handleResetPassword = async (email) => {
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: 'https://dilsin.vercel.app/reset-password',
+  });
+
+  if (error) alert("Erro: " + error.message);
+  else alert("E-mail de recuperação enviado com sucesso!");
 };
 
 const updateStatus = async (id, newStatus) => {
@@ -558,24 +573,60 @@ const toggleManualClose = async () => {
         
         {/* --- VIEW: ADMIN LOGIN --- */}
         {currentView === 'admin-login' && (
-          <div className="max-w-md mx-auto py-12">
-            <Card className="p-8">
+          <div className="max-w-md mx-auto py-20 px-4">
+            <Card className="p-8 shadow-xl border-t-4 border-t-slate-900">
               <div className="text-center mb-8">
-                <Lock className="text-slate-900 mx-auto mb-4" size={32} />
-                <h2 className="text-2xl font-bold">Acesso Restrito</h2>
+                <div className="bg-slate-900 text-white p-3 rounded-2xl w-fit mx-auto mb-4">
+                  <Lock size={24} />
+                </div>
+                <h2 className="text-2xl font-bold italic">Acesso Restrito</h2>
+                <p className="text-slate-500 text-sm mt-2">Identifique-se para gerenciar a barbearia</p>
               </div>
-              <form onSubmit={handleAdminLogin} className="space-y-4">
-                <input 
-                  type="password" 
-                  autoFocus
-                  className="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-slate-900"
-                  placeholder="Senha Administrativa"
-                  value={adminPassword}
-                  onChange={(e) => setAdminPassword(e.target.value)}
-                />
-                <Button type="submit" className="w-full">Entrar</Button>
-                <button onClick={() => navigateTo('home')} className="w-full text-sm text-slate-400">Voltar</button>
+                
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                handleLogin(email, password); // Usa a nova função que você colou
+              }} className="space-y-4">
+                <div>
+                  <label className="text-xs font-bold uppercase text-slate-400 ml-1">E-mail</label>
+                  <input 
+                    type="email" 
+                    className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-slate-200 outline-none"
+                    placeholder="admin@exemplo.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)} // Você precisará criar o state [email, setEmail]
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold uppercase text-slate-400 ml-1">Senha</label>
+                  <input 
+                    type="password" 
+                    className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-slate-200 outline-none"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)} // Você precisará criar o state [password, setPassword]
+                    required
+                  />
+                </div>
+                
+                <Button type="submit" className="w-full py-6 text-lg">Entrar no Painel</Button>
+                
+                <button 
+                  type="button"
+                  onClick={() => handleResetPassword(email)}
+                  className="w-full text-xs text-slate-400 hover:text-slate-600 transition-colors pt-2"
+                >
+                  Esqueceu a senha? Clique para recuperar
+                </button>
               </form>
+              
+              <button 
+                onClick={() => navigateTo('home')}
+                className="w-full text-sm text-slate-500 mt-6 flex items-center justify-center gap-2"
+              >
+                <ArrowLeft size={16}/> Voltar para o início
+              </button>
             </Card>
           </div>
         )}
@@ -869,14 +920,6 @@ const toggleManualClose = async () => {
                   className="flex-1 min-w-[130px] md:flex-none flex items-center justify-center gap-2"
                 >
                   <Settings size={18}/> Configurações
-                </Button>
-
-                <Button 
-                  variant="danger" 
-                  onClick={() => setIsAdminAuthenticated(false)}
-                  className="px-4"
-                >
-                  <Unlock size={18}/>
                 </Button>
               </div>
             </div>
