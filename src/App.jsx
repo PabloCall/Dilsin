@@ -177,16 +177,23 @@ useEffect(() => {
     setIsAdminAuthenticated(!!session);
   });
 
-  // 2. O "Trigger" que monitora mudanças (Login, Logout, Recuperação de Senha)
+  // 2. O "Trigger" que monitora mudanças
   const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-    // Se o evento for de recuperação de senha, joga o usuário para a view de reset
     if (event === "PASSWORD_RECOVERY") {
       setCurrentView('reset-password');
-      navigateTo('reset-password'); // Para atualizar a URL também
+      navigateTo('reset-password');
     }
-    
-    // Atualiza se o admin está autenticado ou não
-    setIsAdminAuthenticated(!!session);
+
+    // Se o evento for SIGNED_OUT, forçamos o estado para falso
+    if (event === "SIGNED_OUT") {
+      setIsAdminAuthenticated(false);
+      setCurrentView('home');
+      navigateTo('home');
+    } 
+    // Se logou ou renovou o token, garantimos que está true
+    else if (session) {
+      setIsAdminAuthenticated(true);
+    }
   });
 
   return () => subscription.unsubscribe();
@@ -389,6 +396,17 @@ const handleResetPassword = async (email) => {
 
   if (error) alert("Erro: " + error.message);
   else alert("E-mail de recuperação enviado com sucesso!");
+};
+
+const handleLogout = async () => {
+  const { error } = await supabase.auth.signOut();
+  if (error) {
+    console.error("Erro ao deslogar:", error);
+  } else {
+    // Limpa os estados e volta para home
+    setIsAdminAuthenticated(false);
+    navigateTo('home');
+  }
 };
 
 const updateStatus = async (id, newStatus) => {
@@ -933,7 +951,7 @@ const toggleManualClose = async () => {
 
                 <Button 
                   variant="danger" 
-                  onClick={() => setIsAdminAuthenticated(false)}
+                  onClick={handleLogout}
                   className="px-4"
                 >
                   <Unlock size={18}/>
