@@ -843,14 +843,41 @@ const toggleManualClose = async () => {
 
         {/* --- VIEW: ADMIN (COM ABAS) --- */}
         {currentView === 'admin' && (
-          <div className="space-y-8">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div className="space-y-8 px-4 md:px-0 pb-10">
+            <div className="flex flex-col gap-4">
               <h2 className="text-3xl font-bold">Painel de Gestão</h2>
-              <div className="flex gap-2">
-                <Button variant={adminTab === 'dashboard' ? 'primary' : 'outline'} onClick={() => setAdminTab('dashboard')} className="flex items-center gap-2"><LayoutDashboard size={18}/> Dashboard</Button>
-                <Button variant={adminTab === 'services' ? 'primary' : 'outline'} onClick={() => setAdminTab('services')} className="flex items-center gap-2"><Briefcase size={18}/> Serviços</Button>
-                <Button variant={adminTab === 'config' ? 'primary' : 'outline'} onClick={() => setAdminTab('config')} className="flex items-center gap-2"><Settings size={18}/> Configurações</Button>
-                <Button variant="danger" onClick={() => setIsAdminAuthenticated(false)}><Unlock size={18}/></Button>
+              <div className="flex flex-wrap gap-2 w-full">
+                <Button 
+                  variant={adminTab === 'dashboard' ? 'primary' : 'outline'} 
+                  onClick={() => setAdminTab('dashboard')} 
+                  className="flex-1 min-w-[130px] md:flex-none flex items-center justify-center gap-2"
+                >
+                  <LayoutDashboard size={18}/> Dashboard
+                </Button>
+
+                <Button 
+                  variant={adminTab === 'services' ? 'primary' : 'outline'} 
+                  onClick={() => setAdminTab('services')} 
+                  className="flex-1 min-w-[130px] md:flex-none flex items-center justify-center gap-2"
+                >
+                  <Briefcase size={18}/> Serviços
+                </Button>
+
+                <Button 
+                  variant={adminTab === 'config' ? 'primary' : 'outline'} 
+                  onClick={() => setAdminTab('config')} 
+                  className="flex-1 min-w-[130px] md:flex-none flex items-center justify-center gap-2"
+                >
+                  <Settings size={18}/> Configurações
+                </Button>
+
+                <Button 
+                  variant="danger" 
+                  onClick={() => setIsAdminAuthenticated(false)}
+                  className="px-4"
+                >
+                  <Unlock size={18}/>
+                </Button>
               </div>
             </div>
 
@@ -872,12 +899,12 @@ const toggleManualClose = async () => {
                   </Card>
                 </div>
 
-                <Card className="overflow-hidden">
+                <Card className="overflow-hidden w-full border-slate-200">
                    <div className="p-6 border-b border-slate-200">
-                     <h3 className="text-xl font-bold">Agenda Completa (Todos os Clientes)</h3>
+                     <h3 className="text-xl font-bold">Agenda Completa</h3>
                    </div>
                    <div className="overflow-x-auto">
-                    <table className="w-full text-left">
+                    <table className="w-full text-left min-w-[600px]">
                       <thead className="bg-slate-50">
                         <tr>
                           <th className="px-6 py-4 text-sm font-semibold text-slate-500 uppercase">Horário</th>
