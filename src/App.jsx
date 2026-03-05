@@ -975,7 +975,7 @@ const toggleManualClose = async () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {workingHours.map(wh => (
                       <div key={wh.day} className={`p-4 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${wh.closed ? 'bg-red-50/50 border-red-100' : 'bg-white border-slate-200'}`}>
-                        {/* Bloco do Dia e Checkbox */}
+                        {/* Bloco do Dia */}
                         <div className="flex-shrink-0">
                           <p className="font-bold text-sm uppercase text-slate-700">{DIAS_SEMANA[wh.day]}</p>
                           <label className="flex items-center gap-2 mt-1 cursor-pointer">
@@ -985,30 +985,30 @@ const toggleManualClose = async () => {
                               onChange={(e) => handleUpdateWorkingHours(wh.day, 'closed', !e.target.checked)} 
                               className="accent-slate-900 h-4 w-4" 
                             />
-                            <span className="text-xs font-medium">{wh.closed ? 'Não funcionamos' : 'Funcionamos'}</span>
+                            <span className="text-xs font-medium text-slate-600">{wh.closed ? 'Não funcionamos' : 'Funcionamos'}</span>
                           </label>
                         </div>
                                         
-                        {/* Bloco dos Horários - Aqui é onde resolvemos o vazamento */}
+                        {/* Bloco dos Horários - Ajustado para não vazar */}
                         {!wh.closed && (
-                          <div className="flex items-center gap-2 bg-slate-50 p-2 rounded-lg border border-slate-100 sm:bg-transparent sm:p-0 sm:border-none">
-                            <div className="flex items-center gap-1">
-                              <span className="text-[10px] uppercase text-slate-400 font-bold sm:hidden">De:</span>
+                          <div className="flex items-center justify-between gap-2 w-full sm:w-auto bg-slate-50 p-2 rounded-lg sm:bg-transparent sm:p-0">
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1 flex-1">
+                              <span className="text-[9px] uppercase text-slate-400 font-bold sm:hidden">Abertura</span>
                               <input 
                                 type="time" 
-                                className="p-1.5 border rounded text-xs bg-white shadow-sm focus:ring-2 focus:ring-slate-200 outline-none" 
+                                className="w-full sm:w-auto p-2 border rounded text-xs bg-white shadow-sm outline-none" 
                                 value={wh.open} 
                                 onChange={e => handleUpdateWorkingHours(wh.day, 'open', e.target.value)} 
                               />
                             </div>
                             
-                            <span className="text-slate-400 text-xs font-bold">até</span>
+                            <span className="text-slate-400 text-[10px] font-bold mt-4 sm:mt-0 px-1">às</span>
                             
-                            <div className="flex items-center gap-1">
-                              <span className="text-[10px] uppercase text-slate-400 font-bold sm:hidden">Até:</span>
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1 flex-1">
+                              <span className="text-[9px] uppercase text-slate-400 font-bold sm:hidden">Fechamento</span>
                               <input 
                                 type="time" 
-                                className="p-1.5 border rounded text-xs bg-white shadow-sm focus:ring-2 focus:ring-slate-200 outline-none" 
+                                className="w-full sm:w-auto p-2 border rounded text-xs bg-white shadow-sm outline-none" 
                                 value={wh.close} 
                                 onChange={e => handleUpdateWorkingHours(wh.day, 'close', e.target.value)} 
                               />
