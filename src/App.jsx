@@ -921,6 +921,14 @@ const toggleManualClose = async () => {
                 >
                   <Settings size={18}/> Configurações
                 </Button>
+
+                <Button 
+                  variant="danger" 
+                  onClick={() => setIsAdminAuthenticated(false)}
+                  className="px-4"
+                >
+                  <Unlock size={18}/>
+                </Button>
               </div>
             </div>
 
