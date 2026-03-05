@@ -41,7 +41,7 @@ const BARBER_FIXO = {
   avatar: 'AO'
 };
 
-const BUFFER_MINUTES = 10;
+/*const BUFFER_MINUTES = 10;*/
 
 const DIAS_SEMANA = [
   "Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"
@@ -278,48 +278,57 @@ const fetchInitialData = async () => {
   // --- Lógica de Horários ---
   const getAvailableSlots = (date, service) => {
     if (!date || !service) return [];
-
-    // Se for hoje e estiver marcado como fechado manualmente, não tem horários
     if (isToday(date) && isManuallyClosedToday) return [];
 
     const dayIndex = getDayOfWeek(date);
     const dayConfig = workingHours.find(h => h.day === dayIndex);
-    
     if (!dayConfig || dayConfig.closed) return [];
 
     const slots = [];
     const startMins = timeToMinutes(dayConfig.open);
     const endMins = timeToMinutes(dayConfig.close);
     const serviceDuration = service.duration || 0;
-    
+    const BUFFER_MINUTES = 5; // Sua margem de segurança
+
+    // MAPEAMENTO DOS AGENDAMENTOS (O segredo está aqui)
     const dayAppointments = appointments
       .filter(app => app.date === date && app.status !== 'Cancelado')
-      .map(app => ({
-        start: timeToMinutes(app.time),
-        end: timeToMinutes(app.time) + (app.service?.duration || 0) + BUFFER_MINUTES
-      }));
+      .map(app => {
+        const start = timeToMinutes(app.time);
+        // Usamos a duração salva no banco (service_duration) + a margem
+        const duration = app.service_duration || 30; 
+        return {
+          start: start,
+          end: start + duration + BUFFER_MINUTES
+        };
+      });
 
     const now = new Date();
     const currentMins = now.getHours() * 60 + now.getMinutes();
-
+    
     let currentPointer = startMins;
 
+    // LOOP DE GERAÇÃO DE SLOTS
     while (currentPointer + serviceDuration <= endMins) {
+      // Regra para não agendar no passado (com 30min de antecedência)
       if (isToday(date) && currentPointer < currentMins + 30) {
-        currentPointer += 30;
+        currentPointer += 10; // Incremento menor para maior precisão
         continue;
       }
 
-      const hasConflict = dayAppointments.some(app => {
+      // Verifica se o slot atual (Início até Fim+Margem) colide com algum agendamento
+      const conflictingApp = dayAppointments.find(app => {
         return (currentPointer < app.end && (currentPointer + serviceDuration + BUFFER_MINUTES) > app.start);
       });
 
-      if (!hasConflict) {
+      if (!conflictingApp) {
         slots.push(minutesToTime(currentPointer));
-        currentPointer += 30; 
+        // Se está livre, avança 10 ou 15 min para oferecer o próximo horário
+        currentPointer += 10; 
       } else {
-        const conflictingApp = dayAppointments.find(app => currentPointer < app.end && (currentPointer + serviceDuration + BUFFER_MINUTES) > app.start);
-        currentPointer = conflictingApp ? conflictingApp.end : currentPointer + 30; 
+        // SE HÁ CONFLITO: O cursor pula direto para o fim do agendamento que está atrapalhando
+        // Isso garante que o próximo horário seja exatamente após os 70min + margem
+        currentPointer = conflictingApp.end; 
       }
     }
     return slots;
